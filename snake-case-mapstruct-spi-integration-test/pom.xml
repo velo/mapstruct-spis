@@ -22,12 +22,14 @@
   <parent>
     <groupId>com.marvinformatics</groupId>
     <artifactId>mapstruct-spis</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.1</version>
   </parent>
   <artifactId>snake-case-mapstruct-spi-integration-test</artifactId>
 
-  <dependencies>
+  <name>snake-case-mapstruct-spi-integration-test</name>
+  <description>Integration test for snake-case-mapstruct-spi</description>
 
+  <dependencies>
     <dependency>
       <groupId>org.mapstruct</groupId>
       <artifactId>mapstruct</artifactId>

@@ -22,9 +22,13 @@
   <parent>
     <groupId>com.marvinformatics</groupId>
     <artifactId>mapstruct-spis</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.1</version>
   </parent>
   <artifactId>snake-case-mapstruct-spi</artifactId>
+
+  <name>snake-case-mapstruct-spi</name>
+  <description>Maps snake_case into camelCases and vice-versa</description>
+
 
   <dependencies>
     <dependency>
