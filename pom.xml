@@ -23,7 +23,7 @@
   <artifactId>mapstruct-spis</artifactId>
   <version>0.2-SNAPSHOT</version>
   <packaging>pom</packaging>
-  
+
   <name>mapstruct-spis</name>
   <description>collection of helpful SPIs for mapstruct</description>
 

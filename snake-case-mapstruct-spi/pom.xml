@@ -29,7 +29,6 @@
   <name>snake-case-mapstruct-spi</name>
   <description>Maps snake_case into camelCases and vice-versa</description>
 
-
   <dependencies>
     <dependency>
       <groupId>org.mapstruct</groupId>
