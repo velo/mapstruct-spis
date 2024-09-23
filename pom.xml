@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (C) 2017 Marvin Herman Froeder (marvin@marvinformatics.com)
+    Copyright (C) 2024 Marvin Herman Froeder (marvin@marvinformatics.com)
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -20,17 +20,62 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.marvinformatics</groupId>
-  <artifactId>${name}</artifactId>
+  <artifactId>mapstruct-spis</artifactId>
   <version>0.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>snake-case-mapstruct-spi</module>
+    <module>snake-case-mapstruct-spi-integration-test</module>
+  </modules>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <coveralls.token></coveralls.token>
-    <java.version>1.8</java.version>
+
+    <lombok.version>1.18.34</lombok.version>
+    <mapstruct.version>1.6.2</mapstruct.version>
+    <git-code-format-maven-plugin.version>5.3</git-code-format-maven-plugin.version>
+    <java.version>11</java.version>
+    <junit5.version>5.11.0</junit5.version>
+    <assertj.version>3.26.3</assertj.version>
   </properties>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junit5.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.assertj</groupId>
+        <artifactId>assertj-core</artifactId>
+        <version>${assertj.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -77,24 +122,6 @@
       </plugin>
 
       <plugin>
-        <groupId>org.eluder.coveralls</groupId>
-        <artifactId>coveralls-maven-plugin</artifactId>
-        <version>4.3.0</version>
-        <configuration>
-          <skip>${skipTests}</skip>
-          <repoToken>${coveralls.token}</repoToken>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>report</goal>
-            </goals>
-            <phase>verify</phase>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.3.0</version>
@@ -124,28 +151,37 @@
         </executions>
       </plugin>
 
+      <!-- linter for java code, will be applied automatically when files are committed to git -->
+      <!-- alternatively, can run with -Pdev to force code format on the whole project -->
       <plugin>
-        <groupId>com.marvinformatics.formatter</groupId>
-        <artifactId>formatter-maven-plugin</artifactId>
-        <version>2.2.0</version>
-        <inherited>false</inherited>
-        <configuration>
-          <sourceDirectory>${project.basedir}</sourceDirectory>
-          <excludes>
-            <exclude>**/src/test/resources/**</exclude>
-            <exclude>**/target/**</exclude>
-          </excludes>
-          <lineEnding>LF</lineEnding>
-          <configFile>${project.basedir}/src/config/eclipse/formatter/java.xml</configFile>
-          <configJsFile>${project.basedir}/src/config/eclipse/formatter/javascript.xml</configJsFile>
-        </configuration>
+        <groupId>com.cosium.code</groupId>
+        <artifactId>git-code-format-maven-plugin</artifactId>
+        <version>${git-code-format-maven-plugin.version}</version>
+        <dependencies>
+          <!-- Enable https://github.com/google/google-java-format -->
+          <dependency>
+            <groupId>com.cosium.code</groupId>
+            <artifactId>google-java-format</artifactId>
+            <version>${git-code-format-maven-plugin.version}</version>
+          </dependency>
+        </dependencies>
         <executions>
+          <!-- On commit, format the modified files -->
           <execution>
-            <id>format</id>
+            <id>install-formatter-hook</id>
             <goals>
-              <goal>format</goal>
+              <goal>install-hooks</goal>
             </goals>
-            <phase>verify</phase>
+            <inherited>false</inherited>
+          </execution>
+          <!-- On Maven verify phase, fail if any file (including
+					unmodified) is
+            badly formatted -->
+          <execution>
+            <id>validate-code-format</id>
+            <goals>
+              <goal>validate-code-format</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>
@@ -199,30 +235,30 @@
       </plugin>
 
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>3.7.1</version>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.4.0</version>
         <configuration>
-          <failOnWarning>true</failOnWarning>
-          <ignoreNonCompile>true</ignoreNonCompile>
+          <sources>
+            <source>target/generated-sources/annotations</source>
+          </sources>
         </configuration>
         <executions>
           <execution>
-            <id>analyze</id>
+            <id>add-source</id>
             <goals>
-              <goal>analyze-only</goal>
+              <goal>add-source</goal>
             </goals>
-            <phase>process-classes</phase>
+            <phase>generate-sources</phase>
           </execution>
         </executions>
       </plugin>
-
     </plugins>
   </build>
 
-  <url>https://github.com/${owner}/${name}/</url>
+  <url>https://github.com/velo/mapstruct-spis/</url>
 
-  <inceptionYear>${year}</inceptionYear>
+  <inceptionYear>2024</inceptionYear>
 
   <licenses>
     <license>
@@ -242,9 +278,9 @@
   </developers>
 
   <scm>
-    <connection>scm:git:git@github.com:${owner}/${name}.git</connection>
-    <developerConnection>scm:git:git@github.com:${owner}/${name}.git</developerConnection>
-    <url>https://github.com/${owner}/${name}/</url>
+    <connection>scm:git:git@github.com:velo/mapstruct-spis.git</connection>
+    <developerConnection>scm:git:git@github.com:velo/mapstruct-spis.git</developerConnection>
+    <url>https://github.com/velo/mapstruct-spis/</url>
   </scm>
 
   <distributionManagement>
@@ -406,6 +442,33 @@
             <configuration>
               <skip>true</skip>
             </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <!-- useful profile for local development -->
+      <id>dev</id>
+
+      <properties>
+        <gcf.skipInstallHooks>false</gcf.skipInstallHooks>
+      </properties>
+
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.cosium.code</groupId>
+            <artifactId>git-code-format-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>format-code</id>
+                <goals>
+                  <goal>format-code</goal>
+                </goals>
+                <phase>initialize</phase>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>
